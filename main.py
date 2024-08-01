@@ -54,10 +54,7 @@ def get_google_sheet_service():
                 }
             }
             flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
-            auth_url, _ = flow.authorization_url(prompt='consent')  # Generate authorization URL
-            print("Please go to this URL and authorize the application: {}".format(auth_url))
-            code = input("Enter the authorization code: ")  # Enter authorization code here
-            credentials = flow.fetch_token(code=code)
+            credentials = flow.run_local_server(port=0)  # Port 0 means the server will use a random available port
         with open("token.json", "w") as token:
             token.write(credentials.to_json())
     try:
