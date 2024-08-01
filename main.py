@@ -5,6 +5,8 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google_auth_oauthlib.flow import Flow
 import streamlit as st
 from pathlib import Path
 import pandas as pd
@@ -46,15 +48,16 @@ def get_google_sheet_service():
                 "installed": {
                     "client_id": os.getenv('GOOGLE_CLIENT_ID'),
                     "project_id": "humansurveyproject",
-                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                    "auth_uri": os.getenv('GOOGLE_AUTH_URI'),
                     "token_uri": os.getenv('GOOGLE_TOKEN_URI'),
-                    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+                    "auth_provider_x509_cert_url": os.getenv('GOOGLE_AUTH_PROVIDER_CERT_URL'),
                     "client_secret": os.getenv('GOOGLE_CLIENT_SECRET'),
                     "redirect_uris": ["http://localhost"]
                 }
             }
+            # For headless environments
             flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
-            credentials = flow.run_local_server(port=0)
+            credentials = flow.run_console()  # Use console flow for headless environments
         with open("token.json", "w") as token:
             token.write(credentials.to_json())
     try:
