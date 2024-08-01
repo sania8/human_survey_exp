@@ -36,14 +36,12 @@ SPREADSHEET_ID = "1PUURytVhS25vs75lFS1duA7EtayJZXkh-d_Y_Rwdkrs"
 
 def get_google_sheet_service():
     credentials = None
-    # Check for existing token file
     if os.path.exists("token.json"):
         credentials = Credentials.from_authorized_user_file("token.json", SCOPES)
     if not credentials or not credentials.valid:
         if credentials and credentials.expired and credentials.refresh_token:
             credentials.refresh(Request())
         else:
-            # Create new credentials from environment variables
             client_config = {
                 "installed": {
                     "client_id": os.getenv('GOOGLE_CLIENT_ID'),
@@ -55,9 +53,11 @@ def get_google_sheet_service():
                     "redirect_uris": ["http://localhost"]
                 }
             }
-            # For headless environments
             flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
-            credentials = flow.run_console()  # Use console flow for headless environments
+            auth_url, _ = flow.authorization_url(prompt='consent')  # Generate authorization URL
+            print("Please go to this URL and authorize the application: {}".format(auth_url))
+            code = input("Enter the authorization code: ")  # Enter authorization code here
+            credentials = flow.fetch_token(code=code)
         with open("token.json", "w") as token:
             token.write(credentials.to_json())
     try:
